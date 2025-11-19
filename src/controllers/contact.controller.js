@@ -1,5 +1,5 @@
 import { sendEmail } from "../utils/sendEmail.js";
-import { asyncHandler } from "../utils/asyncHandler.js";
+import { asyncHandler } from "../utils/AsyncHandler.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 
 export const contactMe = asyncHandler(async (req, res) => {
