@@ -1,10 +1,21 @@
-import multer from "multer";
+import fs from "fs";
 import path from "path";
+import multer from "multer";
 
-// Temporary disk storage (before uploading to Cloudinary)
+// 🚀 Ensure uploads folder exists (Render compatible)
+const uploadDir = path.join(process.cwd(), "uploads");
+
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+  console.log("📁 uploads folder created");
+} else {
+  console.log("📁 uploads folder already exists");
+}
+
+// STORAGE
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "uploads/"); // LOCAL TEMP FOLDER
+    cb(null, "uploads/");
   },
 
   filename: (req, file, cb) => {
@@ -13,25 +24,19 @@ const storage = multer.diskStorage({
   },
 });
 
-// Image filter
+// IMAGE FILTER
 const imageFilter = (req, file, cb) => {
-  if (file.mimetype.startsWith("image/")) {
-    cb(null, true);
-  } else {
-    cb(new Error("Only image files allowed"), false);
-  }
+  if (file.mimetype.startsWith("image/")) cb(null, true);
+  else cb(new Error("Only image files allowed"), false);
 };
 
-// Video filter
+// VIDEO FILTER
 const videoFilter = (req, file, cb) => {
-  if (file.mimetype.startsWith("video/")) {
-    cb(null, true);
-  } else {
-    cb(new Error("Only video files allowed"), false);
-  }
+  if (file.mimetype.startsWith("video/")) cb(null, true);
+  else cb(new Error("Only video files allowed"), false);
 };
 
-// Uploaders
+// UPLOADERS
 export const uploadSingleImage = multer({
   storage,
   fileFilter: imageFilter,
@@ -47,7 +52,7 @@ export const uploadVideo = multer({
   fileFilter: videoFilter,
 }).single("video");
 
-// For project (coverImage + galleryImages)
+// PROJECT UPLOAD (coverImage + images + optional video)
 export const uploadProjectFiles = multer({
   storage,
   fileFilter: (req, file, cb) => {
