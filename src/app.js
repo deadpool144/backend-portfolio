@@ -10,7 +10,7 @@ app.use(cookieParser());
 
 // Allowed origins
 const allowedOrigins = [
-  "https://sih-client-mu.vercel.app",
+  "https://personel-project.vercel.app",
   "http://localhost:3000",
 ];
 
