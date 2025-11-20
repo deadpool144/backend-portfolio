@@ -1,7 +1,6 @@
 import OwnerProfile from "../models/ownerProfile.model.js";
 import { asyncHandler } from "../utils/AsyncHandler.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
-import { ApiError } from "../utils/ApiError.js";
 import { uploadToCloudinary } from "../utils/cloudinary.js";
 import { v2 as cloudinary } from "cloudinary";
 
@@ -11,53 +10,54 @@ import { v2 as cloudinary } from "cloudinary";
 export const getOwnerProfile = asyncHandler(async (req, res) => {
   const profile = await OwnerProfile.findOne();
 
-  if (!profile) {
-    return res.json(new ApiResponse(200, null, "No profile found yet"));
-  }
-
-  return res.json(new ApiResponse(200, profile, "Owner profile fetched"));
+  return res.json(
+    new ApiResponse(
+      200,
+      profile || null,
+      profile ? "Owner profile fetched" : "No profile found yet"
+    )
+  );
 });
 
 // -------------------------------------------------
 // UPDATE OWNER PROFILE (ADMIN ONLY)
 // -------------------------------------------------
 export const updateOwnerProfile = asyncHandler(async (req, res) => {
-  const data = req.body;
-
-  // Parse JSON strings (if needed for arrays/objects)
-  if (data.skills && typeof data.skills === "string") {
-    data.skills = JSON.parse(data.skills);
-  }
-
-  if (data.socialLinks && typeof data.socialLinks === "string") {
-    data.socialLinks = JSON.parse(data.socialLinks);
-  }
-
-  if (data.experience && typeof data.experience === "string") {
-    data.experience = JSON.parse(data.experience);
-  }
-
-  if (data.education && typeof data.education === "string") {
-    data.education = JSON.parse(data.education);
-  }
+  let data = req.body;
 
   // -------------------------------------------------
-  // Handle profile photo upload (if provided)
+  // Fix: Parse JSON for "fields from FormData"
+  // -------------------------------------------------
+  const jsonFields = ["skills", "socialLinks", "experience", "education", "customSections"];
+
+  jsonFields.forEach((field) => {
+    if (data[field] && typeof data[field] === "string") {
+      try {
+        data[field] = JSON.parse(data[field]);
+      } catch (err) {
+        console.log(`Failed to parse ${field}:`, err);
+      }
+    }
+  });
+
+  // -------------------------------------------------
+  // HANDLE PROFILE PHOTO
   // -------------------------------------------------
   if (req.file) {
-    const existingProfile = await OwnerProfile.findOne();
+    const existing = await OwnerProfile.findOne();
 
-    // If old image exists → delete from cloudinary
-    if (existingProfile?.profilePhoto?.public_id) {
+    // Delete old image if exists
+    if (existing?.profilePhoto?.public_id) {
       try {
-        await cloudinary.uploader.destroy(existingProfile.profilePhoto.public_id);
+        await cloudinary.uploader.destroy(existing.profilePhoto.public_id);
       } catch (err) {
-        console.log("Failed to delete old profile photo:", err);
+        console.log("Failed to delete old image:", err);
       }
     }
 
-    // Upload new photo
+    // Upload new image
     const uploaded = await uploadToCloudinary(req.file.path, "owner_profile");
+
     data.profilePhoto = {
       url: uploaded.secure_url,
       public_id: uploaded.public_id,
@@ -65,11 +65,11 @@ export const updateOwnerProfile = asyncHandler(async (req, res) => {
   }
 
   // -------------------------------------------------
-  // Create or update (UPSERT = true)
-  // -------------------------------------------------
+  // CREATE OR UPDATE PROFILE (UPSERT)
+// -------------------------------------------------
   const updatedProfile = await OwnerProfile.findOneAndUpdate({}, data, {
     new: true,
-    upsert: true, // create if not exists
+    upsert: true,
   });
 
   return res.json(
