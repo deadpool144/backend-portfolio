@@ -5,6 +5,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/AsyncHandler.js";
 import { sendEmail } from "../utils/sendEmail.js";
+import { resendOptEmail } from "../utils/resend/resendOtpSender.js";
 
 
 /* -----------------------------------------
@@ -50,15 +51,17 @@ export const signup = asyncHandler(async (req, res) => {
 
   // Send OTP email — if fails, delete the user
   try {
-    await sendEmail({
-      to: email,
-      subject: "Verify Your Email",
-      html: `
-        <p>Hello ${name},</p>
-        <p>Your verification code is: <b>${otp}</b></p>
-        <p>This code expires in 10 minutes.</p>
-      `,
-    });
+
+    await resendOptEmail(email, otp);
+    // await sendEmail({
+    //   to: email,
+    //   subject: "Verify Your Email",
+    //   html: `
+    //     <p>Hello ${name},</p>
+    //     <p>Your verification code is: <b>${otp}</b></p>
+    //     <p>This code expires in 10 minutes.</p>
+    //   `,
+    // });
   } catch (err) {
     await User.findByIdAndDelete(user._id);
     console.error("OTP email failed:", err);
