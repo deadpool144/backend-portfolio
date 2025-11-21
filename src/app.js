@@ -11,7 +11,7 @@ app.use(cookieParser());
 
 // Allowed origins
 const allowedOrigins = [
-  "https://personel-project.vercel.app",
+  "https://personal-project-two-psi.vercel.app",
   "http://localhost:3000",
 ];
 
