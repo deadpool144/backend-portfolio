@@ -105,3 +105,40 @@ export const getAdminStats = asyncHandler(async (req, res) => {
     }, "Admin dashboard stats fetched")
   );
 });
+
+
+// --------------------------------------------------------------------------
+// BLOCK OR UNBLOCK USER (Admin)
+// --------------------------------------------------------------------------
+
+export const toggleBlockUser = asyncHandler(async (req, res) => {
+  const userId = req.params.id;
+
+  // Invalid ID
+  if (!userId || userId.length !== 24) {
+    throw new ApiError(400, "Invalid user ID");
+  }
+
+  // Prevent blocking yourself
+  if (req.user._id.toString() === userId) {
+    throw new ApiError(400, "You cannot block your own admin account");
+  }
+
+  const user = await User.findById(userId);
+  if (!user) throw new ApiError(404, "User not found");
+
+  // Prevent blocking the only admin
+  if (user.role === "admin") {
+    throw new ApiError(403, "You cannot block the only admin account");
+  }
+
+  // Toggle block state
+  user.isBlocked = !user.isBlocked;
+  await user.save();
+
+  const status = user.isBlocked ? "blocked" : "unblocked";
+
+  return res.json(
+    new ApiResponse(200, user, `User has been ${status} successfully`)
+  );
+});

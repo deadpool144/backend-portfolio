@@ -36,6 +36,12 @@ const userSchema = new mongoose.Schema(
       default: false,     // Will become true after OTP verification
     },
 
+    isBlocked: {
+      type: Boolean,
+      default: false,
+    },
+
+
     otp: {
      type: String,
      default: null,
