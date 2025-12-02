@@ -113,6 +113,9 @@ export const login = asyncHandler(async (req, res) => {
   if (!user.isVerified) {
     throw new ApiError(403, "Email not verified. Please verify your account.");
   }
+  if (user.isBlocked) {
+    throw new ApiError(403, "Your account has been blocked. Contact support.");
+  }
 
   // Check password
   const match = await bcrypt.compare(password, user.password);

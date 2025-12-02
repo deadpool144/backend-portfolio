@@ -24,6 +24,9 @@ export const protect = asyncHandler(async (req, res, next) => {
   if (!user) {
     throw new ApiError(401, "User not found or deleted");
   }
+  if (user.isBlocked) {
+    throw new ApiError(403, "Your account has been blocked. Contact support.");
+  }
 
   req.user = user; // attach user to request
   next();

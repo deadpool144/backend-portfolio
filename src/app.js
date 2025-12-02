@@ -56,6 +56,9 @@ app.use("/projects", projectRoutes);
 app.use("/admin", adminRoutes);
 app.use("/contact", contactRoutes);
 
+import { errorHandler } from "./middlewares/error middleware.js";
+
+app.use(errorHandler);
 
 
 export { app };
