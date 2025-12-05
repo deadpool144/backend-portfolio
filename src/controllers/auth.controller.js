@@ -166,6 +166,20 @@ export const logout = asyncHandler(async (req, res) => {
 /* -----------------------------------------
    🔹 GET LOGGED-IN USER
 ----------------------------------------- */
+// export const getMe = asyncHandler(async (req, res) => {
+//   return res.json(
+//     new ApiResponse(
+//       200,
+//       {
+//         id: req.user._id,
+//         name: req.user.name,
+//         email: req.user.email,
+//         role: req.user.role,
+//       },
+//       "User fetched successfully"
+//     )
+//   );
+// });
 export const getMe = asyncHandler(async (req, res) => {
   return res.json(
     new ApiResponse(
@@ -175,11 +189,14 @@ export const getMe = asyncHandler(async (req, res) => {
         name: req.user.name,
         email: req.user.email,
         role: req.user.role,
+        isVerified: req.user.isVerified,
+        isBlocked: req.user.isBlocked,
       },
       "User fetched successfully"
     )
   );
 });
+
 
 
 /* -----------------------------------------

@@ -21,6 +21,11 @@ router.patch("/users/:id/role", protect, adminOnly, updateUserRole);
 router.delete("/delete/:id", protect, adminOnly, deleteUser);
 router.patch("/toggle-block/:id",protect, adminOnly, toggleBlockUser);
 
+// --------------------------
+// Project Routes
+// --------------------------
+
+
 // ------------------------------------------
 // DASHBOARD STATS ROUTE
 // ------------------------------------------
